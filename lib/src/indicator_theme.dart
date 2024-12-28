@@ -1,24 +1,25 @@
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'indicators.dart';
+import 'connectors.dart';
 import 'timeline_node.dart';
 import 'timeline_theme.dart';
 
-/// Defines the visual properties of [DotIndicator], indicators inside
-/// [TimelineNode]s.
+/// Defines the visual properties of [SolidLineConnector], connectors inside
+/// [TimelineNode].
 ///
-/// Descendant widgets obtain the current [IndicatorThemeData] object using
-/// `IndicatorTheme.of(context)`. Instances of [IndicatorThemeData] can be
-/// customized with [IndicatorThemeData.copyWith].
+/// Descendant widgets obtain the current [ConnectorThemeData] object using
+/// `ConnectorTheme.of(context)`. Instances of [ConnectorThemeData] can be
+/// customized with [ConnectorThemeData.copyWith].
 ///
-/// Typically a [IndicatorThemeData] is specified as part of the overall
-/// [TimelineTheme] with [TimelineThemeData.indicatorTheme].
+/// Typically a [ConnectorThemeData] is specified as part of the overall
+/// [TimelineTheme] with [TimelineThemeData.connectorTheme].
 ///
-/// All [IndicatorThemeData] properties are `null` by default. When null, the
+/// All [ConnectorThemeData] properties are `null` by default. When null, the
 /// widgets will provide their own defaults.
 ///
 /// See also:
@@ -26,67 +27,80 @@ import 'timeline_theme.dart';
 ///  * [TimelineThemeData], which describes the overall theme information for
 ///  the timeline.
 @immutable
-class IndicatorThemeData with Diagnosticable {
-  /// Creates a theme that can be used for [IndicatorTheme] or
-  /// [TimelineThemeData.indicatorTheme].
-  const IndicatorThemeData({
+class ConnectorThemeData with Diagnosticable {
+  /// Creates a theme that can be used for [ConnectorTheme] or
+  /// [TimelineThemeData.connectorTheme].
+  const ConnectorThemeData({
     this.color,
-    this.size,
-    this.position,
+    this.space,
+    this.thickness,
+    this.indent,
   });
 
-  /// The color of [DotIndicator]s and indicators inside [TimelineNode]s, and so
-  /// forth.
+  /// The color of [SolidLineConnector]s and connectors inside [TimelineNode]s,
+  /// and so forth.
   final Color? color;
 
-  /// The size of [DotIndicator]s and indicators inside [TimelineNode]s, and so
-  /// forth in logical pixels.
-  ///
-  /// Indicators occupy a square with width and height equal to size.
-  final double? size;
+  /// This represents the amount of horizontal or vertical space the connector
+  /// takes up.
+  final double? space;
 
-  /// A position of indicator inside both two connectors.
-  final double? position;
+  /// The thickness of the line drawn within the connector.
+  final double? thickness;
+
+  /// The amount of empty space at the edge of [SolidLineConnector].
+  final double? indent;
 
   /// Creates a copy of this object with the given fields replaced with the new
   /// values.
-  IndicatorThemeData copyWith({
+  ConnectorThemeData copyWith({
     Color? color,
-    double? size,
-    double? position,
+    double? space,
+    double? thickness,
+    double? indent,
   }) {
-    return IndicatorThemeData(
+    return ConnectorThemeData(
       color: color ?? this.color,
-      size: size ?? this.size,
-      position: position ?? this.position,
+      space: space ?? this.space,
+      thickness: thickness ?? this.thickness,
+      indent: indent ?? this.indent,
     );
   }
 
-  /// Linearly interpolate between two Indicator themes.
+  /// Linearly interpolate between two Connector themes.
   ///
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static IndicatorThemeData lerp(
-      IndicatorThemeData? a, IndicatorThemeData? b, double t) {
-    return IndicatorThemeData(
+  static ConnectorThemeData lerp(
+      ConnectorThemeData? a, ConnectorThemeData? b, double t) {
+    return ConnectorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
-      size: lerpDouble(a?.size, b?.size, t),
-      position: lerpDouble(a?.position, b?.position, t),
+      space: lerpDouble(a?.space, b?.space, t),
+      thickness: lerpDouble(a?.thickness, b?.thickness, t),
+      indent: lerpDouble(a?.indent, b?.indent, t),
     );
   }
 
   @override
-  int get hashCode => hashValues(color, size, position);
+  int get hashCode {
+    return Object.hash(
+      color,
+      space,
+      thickness,
+      indent,
+    );
+  }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
-    return other is IndicatorThemeData &&
+    return other is ConnectorThemeData &&
         other.color == color &&
-        other.size == size &&
-        other.position == position;
+        other.space == space &&
+        other.thickness == thickness &&
+        other.indent == indent;
   }
 
   @override
@@ -94,55 +108,55 @@ class IndicatorThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties
       ..add(ColorProperty('color', color, defaultValue: null))
-      ..add(DoubleProperty('size', size, defaultValue: null))
-      ..add(DoubleProperty('position', size, defaultValue: null));
+      ..add(DoubleProperty('space', space, defaultValue: null))
+      ..add(DoubleProperty('thickness', thickness, defaultValue: null))
+      ..add(DoubleProperty('indent', indent, defaultValue: null));
   }
 }
 
-/// Controls the default color and size of indicators in a widget subtree.
-///
-/// The indicator theme is honored by [TimelineNode], [DotIndicator] and
-/// [OutlinedDotIndicator] widgets.
-class IndicatorTheme extends InheritedTheme {
-  /// Creates an indicator theme that controls the color and size for
-  /// [DotIndicator]s, indicators inside [TimelineNode]s.
-  const IndicatorTheme({
+/// An inherited widget that defines the configuration for
+/// [SolidLineConnector]s, connectors inside [TimelineNode]s.
+class ConnectorTheme extends InheritedTheme {
+  /// Creates a connector theme that controls the configurations for
+  /// [SolidLineConnector]s, connectors inside [TimelineNode]s.
+  const ConnectorTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
-  /// The properties for descendant [DotIndicator]s, indicators inside
+  /// The properties for descendant [SolidLineConnector]s, connectors inside
   /// [TimelineNode]s.
-  final IndicatorThemeData data;
+  final ConnectorThemeData data;
 
-  /// The data from the closest instance of this class that encloses the given
+  /// The closest instance of this class's [data] value that encloses the given
   /// context.
   ///
-  /// Defaults to the current [TimelineThemeData.indicatorTheme].
+  /// If there is no ancestor, it returns [TimelineThemeData.connectorTheme].
+  /// Applications can assume that the returned value will not be null.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  ///  IndicatorThemeData theme = IndicatorTheme.of(context);
+  /// ConnectorThemeData theme = ConnectorTheme.of(context);
   /// ```
-  static IndicatorThemeData of(BuildContext context) {
-    final indicatorTheme =
-        context.dependOnInheritedWidgetOfExactType<IndicatorTheme>();
-    return indicatorTheme?.data ?? TimelineTheme.of(context).indicatorTheme;
+  static ConnectorThemeData of(BuildContext context) {
+    final connectorTheme =
+        context.dependOnInheritedWidgetOfExactType<ConnectorTheme>();
+    return connectorTheme?.data ?? TimelineTheme.of(context).connectorTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
     final ancestorTheme =
-        context.findAncestorWidgetOfExactType<IndicatorTheme>();
+        context.findAncestorWidgetOfExactType<ConnectorTheme>();
     return identical(this, ancestorTheme)
         ? child
-        : IndicatorTheme(data: data, child: child);
+        : ConnectorTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(IndicatorTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(ConnectorTheme oldWidget) => data != oldWidget.data;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -151,30 +165,48 @@ class IndicatorTheme extends InheritedTheme {
   }
 }
 
-/// Indicator component configured through [IndicatorTheme]
-mixin ThemedIndicatorComponent on PositionedIndicator {
-  /// {@template timelines.indicator.color}
-  /// Defaults to the current [IndicatorTheme] color, if any.
-  ///
-  /// If no [IndicatorTheme] and no [TimelineTheme] is specified, indicators
-  /// will default to blue.
+/// Connector component configured through [ConnectorTheme]
+mixin ThemedConnectorComponent on Widget {
+  /// {@template timelines.connector.direction}
+  /// If this is null, then the [TimelineThemeData.direction] is used.
   /// {@endtemplate}
+  Axis? get direction;
+  Axis getEffectiveDirection(BuildContext context) {
+    return direction ?? TimelineTheme.of(context).direction;
+  }
+
+  /// {@template timelines.connector.thickness}
+  /// If this is null, then the [ConnectorThemeData.thickness] is used which
+  /// defaults to 2.0.
+  /// {@endtemplate}
+  double? get thickness;
+  double getEffectiveThickness(BuildContext context) {
+    return thickness ?? ConnectorTheme.of(context).thickness ?? 2.0;
+  }
+
+  /// {@template timelines.connector.space}
+  /// If this is null, then the [ConnectorThemeData.space] is used. If that is
+  /// also null, then this defaults to double.infinity.
+  /// {@endtemplate}
+  double? get space;
+  double? getEffectiveSpace(BuildContext context) {
+    return space ?? ConnectorTheme.of(context).space;
+  }
+
+  double? get indent;
+  double getEffectiveIndent(BuildContext context) {
+    return indent ?? ConnectorTheme.of(context).indent ?? 0.0;
+  }
+
+  double? get endIndent;
+  double getEffectiveEndIndent(BuildContext context) {
+    return endIndent ?? ConnectorTheme.of(context).indent ?? 0.0;
+  }
+
   Color? get color;
   Color getEffectiveColor(BuildContext context) {
     return color ??
-        IndicatorTheme.of(context).color ??
+        ConnectorTheme.of(context).color ??
         TimelineTheme.of(context).color;
-  }
-
-  /// {@template timelines.indicator.size}
-  /// Indicators occupy a square with width and height equal to size.
-  ///
-  /// Defaults to the current [IndicatorTheme] size, if any. If there is no
-  /// [IndicatorTheme], or it does not specify an explicit size, then it
-  /// defaults to own child size(0.0).
-  /// {@endtemplate}
-  double? get size;
-  double? getEffectiveSize(BuildContext context) {
-    return size ?? IndicatorTheme.of(context).size;
   }
 }
